@@ -6,6 +6,7 @@ import android.annotation.SuppressLint;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -53,6 +54,85 @@ public class MainActivity extends AppCompatActivity {
 
         String sDuration = convertFormat(duration);
 
+        playerDuration.setText(sDuration);
+
+        btPlay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                btPlay.setVisibility(View.GONE);
+                btPause.setVisibility(View.VISIBLE);
+                mediaPlayer.start();
+                seekBar.setMax(mediaPlayer.getDuration());
+                handler.postDelayed(runnable , 0);
+            }
+        });
+
+        btPause.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                btPause.setVisibility(View.GONE);
+                btPlay.setVisibility(View.VISIBLE);
+                mediaPlayer.pause();
+                handler.removeCallbacks(runnable);
+            }
+        });
+
+        btFf.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int currentPosition = mediaPlayer.getCurrentPosition();
+                int duration = mediaPlayer.getDuration();
+                if (mediaPlayer.isPlaying() && duration != currentPosition) {
+                    // Add 5 Seconds to currentPosition
+                    currentPosition = currentPosition + 5000;
+                    playerPosition.setText(convertFormat(currentPosition));
+                    mediaPlayer.seekTo(currentPosition);
+                }
+            }
+        });
+
+        btRew.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int currentPosition = mediaPlayer.getCurrentPosition();
+                if (mediaPlayer.isPlaying() && currentPosition > 5000) {
+                    currentPosition = currentPosition - 5000;
+                    playerPosition.setText(convertFormat(currentPosition));
+                    mediaPlayer.seekTo(currentPosition);
+                }
+            }
+        });
+
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                if (b) {
+                    mediaPlayer.seekTo(i);
+
+                }
+                playerPosition.setText(convertFormat(mediaPlayer.getCurrentPosition()));
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
+        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mediaPlayer) {
+                btPause.setVisibility(View.GONE);
+                btPlay.setVisibility(View.VISIBLE);
+                mediaPlayer.seekTo(0);
+            }
+        });
+
 
 
     }
@@ -62,6 +142,6 @@ public class MainActivity extends AppCompatActivity {
         return String.format("%02d:%02d"
         , TimeUnit.MILLISECONDS.toMinutes(duration)
                 , TimeUnit.MILLISECONDS.toSeconds(duration)
-                - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(duration));
+                - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(duration)));
     }
 }
